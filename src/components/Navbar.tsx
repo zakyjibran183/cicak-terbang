@@ -102,7 +102,7 @@ export default function Navbar({ isDark, toggleTheme }: NavbarProps) {
                 PORTFOLIO
               </p>
               <p className="text-sm font-semibold group-hover:text-cyan-400 transition">
-                AHMAD MUFAZAL
+                M. ZAKY JIBRAN
               </p>
             </div>
           </div>
