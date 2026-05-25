@@ -12,12 +12,6 @@ export default function Navbar({ isDark, toggleTheme }: NavbarProps) {
   const [active, setActive] = useState("#home");
   const [scrolled, setScrolled] = useState(false);
 
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 25);
-    window.addEventListener("scroll", onScroll);
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-
   const nav = [
     { label: "Home", href: "#home" },
     { label: "About", href: "#about" },
@@ -26,10 +20,43 @@ export default function Navbar({ isDark, toggleTheme }: NavbarProps) {
     { label: "Contact", href: "#contact" },
   ];
 
+  // background effect
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 25);
+    window.addEventListener("scroll", onScroll);
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  // ✅ FIX: scroll spy lebih stabil (tanpa layoutId chaos)
+  useEffect(() => {
+    const sections = nav
+      .map((i) => document.querySelector(i.href))
+      .filter(Boolean) as HTMLElement[];
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setActive(`#${entry.target.id}`);
+          }
+        });
+      },
+      { threshold: 0.5 }
+    );
+
+    sections.forEach((sec) => observer.observe(sec));
+
+    return () => observer.disconnect();
+  }, []);
+
   const go = (href: string) => {
-    setActive(href);
+    setActive(href); // ✅ langsung sync biar underline gak delay
     setOpen(false);
-    document.querySelector(href)?.scrollIntoView({ behavior: "smooth" });
+
+    document.querySelector(href)?.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
   };
 
   return (
@@ -40,13 +67,13 @@ export default function Navbar({ isDark, toggleTheme }: NavbarProps) {
     >
       <div className="mt-4 w-[94%] md:w-[85%] relative">
 
-        {/* 🌈 NEON BACKGROUND AURA */}
+        {/* 🔵 NEON AURA */}
         <div className="absolute inset-0 -z-10 overflow-hidden">
           <div className="absolute -top-10 left-1/2 -translate-x-1/2 w-[300px] h-[300px] bg-cyan-400/20 blur-[90px] rounded-full animate-pulse" />
           <div className="absolute top-0 right-0 w-[200px] h-[200px] bg-blue-500/20 blur-[100px] rounded-full animate-pulse" />
         </div>
 
-        {/* TOP LINE */}
+        {/* top line */}
         <div className="h-[1px] w-full bg-gradient-to-r from-transparent via-foreground/30 to-transparent" />
 
         {/* MAIN BAR */}
@@ -54,9 +81,7 @@ export default function Navbar({ isDark, toggleTheme }: NavbarProps) {
           className={`
             relative flex items-center justify-between
             px-5 md:px-10 h-16
-            transition-all duration-500
-
-            backdrop-blur-xl
+            backdrop-blur-xl transition-all duration-500
 
             ${
               scrolled
@@ -65,7 +90,7 @@ export default function Navbar({ isDark, toggleTheme }: NavbarProps) {
             }
           `}
         >
-          {/* LEFT BRAND */}
+          {/* BRAND */}
           <div
             onClick={() => go("#home")}
             className="flex items-center gap-3 cursor-pointer group"
@@ -76,38 +101,38 @@ export default function Navbar({ isDark, toggleTheme }: NavbarProps) {
               <p className="text-xs tracking-[0.3em] text-muted-foreground">
                 PORTFOLIO
               </p>
-              <p className="text-sm font-semibold tracking-wide group-hover:text-cyan-400 transition">
-                M. ZAKY JIBRAN
+              <p className="text-sm font-semibold group-hover:text-cyan-400 transition">
+                AHMAD MUFAZAL
               </p>
             </div>
           </div>
 
-          {/* CENTER NAV */}
-          <nav className="hidden md:flex items-center gap-8 relative">
+          {/* NAV */}
+          <nav className="hidden md:flex items-center gap-8">
             {nav.map((i) => (
               <button
                 key={i.href}
                 onClick={() => go(i.href)}
-                className={`
-                  relative text-sm transition duration-300
-                  ${
-                    active === i.href
-                      ? "text-cyan-400 drop-shadow-[0_0_10px_rgba(34,211,238,0.8)]"
-                      : "text-muted-foreground hover:text-foreground"
-                  }
-                `}
+                className={`relative text-sm transition ${
+                  active === i.href
+                    ? "text-cyan-400 drop-shadow-[0_0_10px_rgba(34,211,238,0.8)]"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
               >
                 {i.label}
 
-                {/* neon indicator */}
+                {/* ✅ FIX UNDERLINE (NO layoutId lagi) */}
                 {active === i.href && (
                   <motion.div
-                    layoutId="navFocus"
+                    initial={{ scaleX: 0 }}
+                    animate={{ scaleX: 1 }}
+                    exit={{ scaleX: 0 }}
+                    transition={{ duration: 0.25 }}
                     className="
                       absolute -bottom-2 left-0 w-full h-[2px]
                       bg-cyan-400
                       shadow-[0_0_12px_rgba(34,211,238,0.8)]
-                      rounded-full
+                      rounded-full origin-left
                     "
                   />
                 )}
@@ -115,23 +140,15 @@ export default function Navbar({ isDark, toggleTheme }: NavbarProps) {
             ))}
           </nav>
 
-          {/* RIGHT ACTION */}
+          {/* ACTION */}
           <div className="flex items-center gap-3">
-            {/* theme */}
             <button
               onClick={toggleTheme}
-              className="
-                p-2 border border-border
-                hover:shadow-[0_0_15px_rgba(34,211,238,0.4)]
-                hover:border-cyan-400
-                transition
-                active:scale-95
-              "
+              className="p-2 border border-border hover:border-cyan-400 transition"
             >
               {isDark ? <Sun size={16} /> : <Moon size={16} />}
             </button>
 
-            {/* mobile */}
             <button
               onClick={() => setOpen(!open)}
               className="md:hidden p-2 border border-border"
@@ -148,7 +165,7 @@ export default function Navbar({ isDark, toggleTheme }: NavbarProps) {
               initial={{ height: 0, opacity: 0 }}
               animate={{ height: "auto", opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
-              className="md:hidden overflow-hidden border border-border border-t-0 bg-background/90 backdrop-blur-xl"
+              className="md:hidden overflow-hidden border border-border bg-background/90 backdrop-blur-xl"
             >
               <div className="flex flex-col p-4 gap-3">
                 {nav.map((i) => (
