@@ -14,10 +14,10 @@ export default function Navbar({ isDark, toggleTheme }: NavbarProps) {
 
   const nav = [
     { label: "Home", href: "#home" },
-    { label: "About", href: "#about" },
-    { label: "Skills", href: "#skills" },
-    { label: "Work", href: "#projects" },
-    { label: "Contact", href: "#contact" },
+    { label: "Kenalan Singkat", href: "#about" },
+    { label: "Mapel Favorit", href: "#skills" },
+    { label: "Favorite Movies", href: "#projects" },
+    { label: "Call Me", href: "#contact" },
   ];
 
   // 🌊 background blur effect
