@@ -20,59 +20,52 @@ export default function Navbar({ isDark, toggleTheme }: NavbarProps) {
     { label: "Call Me", href: "#contact" },
   ];
 
-  // 🌊 background blur effect
+  // background blur effect
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 25);
     window.addEventListener("scroll", onScroll);
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // 🔥 FIXED SCROLL SPY (ANTI ERROR + STABLE)
+  // ✅ FIXED SCROLL SPY (100% STABLE)
   useEffect(() => {
-    const sections = nav
-      .map((i) => document.querySelector(i.href))
-      .filter(Boolean) as HTMLElement[];
+    const handleScroll = () => {
+      const scrollY = window.scrollY + 120; // offset navbar
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        let bestRatio = 0;
-        let bestId = "";
+      let current = "#home";
 
-        entries.forEach((entry) => {
-          if (entry.isIntersecting && entry.intersectionRatio > bestRatio) {
-            bestRatio = entry.intersectionRatio;
-            bestId = `#${entry.target.id}`;
-          }
-        });
+      nav.forEach((item) => {
+        const el = document.querySelector(item.href) as HTMLElement;
+        if (!el) return;
 
-        if (bestId) setActive(bestId);
-      },
-      {
-        threshold: [0.2, 0.4, 0.6],
-        rootMargin: "-80px 0px -40% 0px",
-      }
-    );
+        if (el.offsetTop <= scrollY) {
+          current = item.href;
+        }
+      });
 
-    sections.forEach((sec) => observer.observe(sec));
+      setActive(current);
+    };
 
-    return () => observer.disconnect();
+    window.addEventListener("scroll", handleScroll);
+    handleScroll();
+
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // 🚀 SMOOTH SCROLL FIX (NO OFFSET BUG)
+  // smooth scroll FIX
   const go = (href: string) => {
     setActive(href);
     setOpen(false);
 
     const el = document.querySelector(href);
-    if (el) {
-      const top =
-        el.getBoundingClientRect().top + window.scrollY - 80;
+    if (!el) return;
 
-      window.scrollTo({
-        top,
-        behavior: "smooth",
-      });
-    }
+    const top = (el as HTMLElement).offsetTop - 80;
+
+    window.scrollTo({
+      top,
+      behavior: "smooth",
+    });
   };
 
   return (
@@ -83,7 +76,7 @@ export default function Navbar({ isDark, toggleTheme }: NavbarProps) {
     >
       <div className="mt-4 w-[94%] md:w-[85%] relative">
 
-        {/* 🌊 CYAN AURA */}
+        {/* AURA */}
         <div className="absolute inset-0 -z-10 overflow-hidden">
           <div className="absolute -top-20 left-1/2 -translate-x-1/2 w-[350px] h-[350px] bg-cyan-300/20 blur-[120px] rounded-full" />
           <div className="absolute top-0 right-0 w-[250px] h-[250px] bg-blue-400/20 blur-[120px] rounded-full" />
@@ -136,7 +129,7 @@ export default function Navbar({ isDark, toggleTheme }: NavbarProps) {
               >
                 {i.label}
 
-                {/* 🔥 FIXED UNDERLINE */}
+                {/* UNDERLINE FIXED */}
                 {active === i.href && (
                   <motion.div
                     layoutId="underline"
