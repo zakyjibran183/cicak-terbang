@@ -1,7 +1,6 @@
-import { useState, useEffect } from 'react';
-import { Moon, Sun, Menu, X } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useEffect, useState } from "react";
+import { Moon, Sun, Menu, X } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface NavbarProps {
   isDark: boolean;
@@ -9,149 +8,164 @@ interface NavbarProps {
 }
 
 export default function Navbar({ isDark, toggleTheme }: NavbarProps) {
-  const [isScrolled, setIsScrolled] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [open, setOpen] = useState(false);
+  const [active, setActive] = useState("#home");
+  const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50);
-    };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    const onScroll = () => setScrolled(window.scrollY > 25);
+    window.addEventListener("scroll", onScroll);
+    return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  const navItems = [
-    { label: 'Home', href: '#home' },
-    { label: 'About', href: '#about' },
-    { label: 'Skills', href: '#skills' },
-    { label: 'Projects', href: '#projects' },
-    { label: 'Contact', href: '#contact' },
+  const nav = [
+    { label: "Home", href: "#home" },
+    { label: "About", href: "#about" },
+    { label: "Skills", href: "#skills" },
+    { label: "Work", href: "#projects" },
+    { label: "Contact", href: "#contact" },
   ];
 
-  const scrollToSection = (href: string) => {
-    const element = document.querySelector(href);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
-    }
-    setIsMobileMenuOpen(false);
+  const go = (href: string) => {
+    setActive(href);
+    setOpen(false);
+    document.querySelector(href)?.scrollIntoView({ behavior: "smooth" });
   };
 
   return (
-    <motion.nav
-      initial={{ y: -100 }}
-      animate={{ y: 0 }}
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        isScrolled ? 'glass-strong shadow-card' : 'bg-transparent'
-      }`}
+    <motion.header
+      initial={{ y: -80, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      className="fixed top-0 left-0 w-full z-50 flex justify-center"
     >
-      <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between h-16 md:h-20">
-          <motion.a
-            href="#home"
-            onClick={(e) => {
-              e.preventDefault();
-              scrollToSection('#home');
-            }}
-            className="font-display text-xl md:text-2xl font-bold text-gradient cursor-pointer"
-            whileHover={{ scale: 1.05 }}
-          >
-            &lt;Dev /&gt;
-          </motion.a>
+      <div className="mt-4 w-[94%] md:w-[85%] relative">
 
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center gap-8">
-            {navItems.map((item) => (
-              <motion.a
-                key={item.label}
-                href={item.href}
-                onClick={(e) => {
-                  e.preventDefault();
-                  scrollToSection(item.href);
-                }}
-                className="text-muted-foreground hover:text-foreground transition-colors font-medium cursor-pointer"
-                whileHover={{ y: -2 }}
-              >
-                {item.label}
-              </motion.a>
-            ))}
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={toggleTheme}
-              className="rounded-full"
-            >
-              <AnimatePresence mode="wait">
-                {isDark ? (
-                  <motion.div
-                    key="sun"
-                    initial={{ rotate: -90, opacity: 0 }}
-                    animate={{ rotate: 0, opacity: 1 }}
-                    exit={{ rotate: 90, opacity: 0 }}
-                  >
-                    <Sun className="h-5 w-5" />
-                  </motion.div>
-                ) : (
-                  <motion.div
-                    key="moon"
-                    initial={{ rotate: 90, opacity: 0 }}
-                    animate={{ rotate: 0, opacity: 1 }}
-                    exit={{ rotate: -90, opacity: 0 }}
-                  >
-                    <Moon className="h-5 w-5" />
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </Button>
+        {/* 🌈 NEON BACKGROUND AURA */}
+        <div className="absolute inset-0 -z-10 overflow-hidden">
+          <div className="absolute -top-10 left-1/2 -translate-x-1/2 w-[300px] h-[300px] bg-cyan-400/20 blur-[90px] rounded-full animate-pulse" />
+          <div className="absolute top-0 right-0 w-[200px] h-[200px] bg-blue-500/20 blur-[100px] rounded-full animate-pulse" />
+        </div>
+
+        {/* TOP LINE */}
+        <div className="h-[1px] w-full bg-gradient-to-r from-transparent via-foreground/30 to-transparent" />
+
+        {/* MAIN BAR */}
+        <div
+          className={`
+            relative flex items-center justify-between
+            px-5 md:px-10 h-16
+            transition-all duration-500
+
+            backdrop-blur-xl
+
+            ${
+              scrolled
+                ? "bg-background/80 border border-border shadow-[0_10px_40px_-10px_rgba(34,211,238,0.25)]"
+                : "bg-transparent"
+            }
+          `}
+        >
+          {/* LEFT BRAND */}
+          <div
+            onClick={() => go("#home")}
+            className="flex items-center gap-3 cursor-pointer group"
+          >
+            <div className="w-1 h-6 bg-cyan-400 shadow-[0_0_15px_rgba(34,211,238,0.8)]" />
+
+            <div className="leading-tight">
+              <p className="text-xs tracking-[0.3em] text-muted-foreground">
+                PORTFOLIO
+              </p>
+              <p className="text-sm font-semibold tracking-wide group-hover:text-cyan-400 transition">
+                M. ZAKY JIBRAN
+              </p>
+            </div>
           </div>
 
-          {/* Mobile Menu Button */}
-          <div className="flex items-center gap-2 md:hidden">
-            <Button
-              variant="ghost"
-              size="icon"
+          {/* CENTER NAV */}
+          <nav className="hidden md:flex items-center gap-8 relative">
+            {nav.map((i) => (
+              <button
+                key={i.href}
+                onClick={() => go(i.href)}
+                className={`
+                  relative text-sm transition duration-300
+                  ${
+                    active === i.href
+                      ? "text-cyan-400 drop-shadow-[0_0_10px_rgba(34,211,238,0.8)]"
+                      : "text-muted-foreground hover:text-foreground"
+                  }
+                `}
+              >
+                {i.label}
+
+                {/* neon indicator */}
+                {active === i.href && (
+                  <motion.div
+                    layoutId="navFocus"
+                    className="
+                      absolute -bottom-2 left-0 w-full h-[2px]
+                      bg-cyan-400
+                      shadow-[0_0_12px_rgba(34,211,238,0.8)]
+                      rounded-full
+                    "
+                  />
+                )}
+              </button>
+            ))}
+          </nav>
+
+          {/* RIGHT ACTION */}
+          <div className="flex items-center gap-3">
+            {/* theme */}
+            <button
               onClick={toggleTheme}
-              className="rounded-full"
+              className="
+                p-2 border border-border
+                hover:shadow-[0_0_15px_rgba(34,211,238,0.4)]
+                hover:border-cyan-400
+                transition
+                active:scale-95
+              "
             >
-              {isDark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              {isDark ? <Sun size={16} /> : <Moon size={16} />}
+            </button>
+
+            {/* mobile */}
+            <button
+              onClick={() => setOpen(!open)}
+              className="md:hidden p-2 border border-border"
             >
-              {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-            </Button>
+              {open ? <X size={16} /> : <Menu size={16} />}
+            </button>
           </div>
         </div>
-      </div>
 
-      {/* Mobile Menu */}
-      <AnimatePresence>
-        {isMobileMenuOpen && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            className="md:hidden glass-strong border-t border-border"
-          >
-            <div className="container mx-auto px-4 py-4 flex flex-col gap-4">
-              {navItems.map((item) => (
-                <a
-                  key={item.label}
-                  href={item.href}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    scrollToSection(item.href);
-                  }}
-                  className="text-muted-foreground hover:text-foreground transition-colors font-medium py-2"
-                >
-                  {item.label}
-                </a>
-              ))}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </motion.nav>
+        {/* MOBILE */}
+        <AnimatePresence>
+          {open && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              className="md:hidden overflow-hidden border border-border border-t-0 bg-background/90 backdrop-blur-xl"
+            >
+              <div className="flex flex-col p-4 gap-3">
+                {nav.map((i) => (
+                  <button
+                    key={i.href}
+                    onClick={() => go(i.href)}
+                    className="text-left text-muted-foreground hover:text-cyan-400 transition"
+                  >
+                    {i.label}
+                  </button>
+                ))}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+      </div>
+    </motion.header>
   );
 }
