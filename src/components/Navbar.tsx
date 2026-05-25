@@ -20,12 +20,14 @@ export default function Navbar({ isDark, toggleTheme }: NavbarProps) {
     { label: "Contact", href: "#contact" },
   ];
 
+  // 🌊 background blur effect
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 25);
     window.addEventListener("scroll", onScroll);
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  // 🔥 FIXED SCROLL SPY (ANTI ERROR + STABLE)
   useEffect(() => {
     const sections = nav
       .map((i) => document.querySelector(i.href))
@@ -33,27 +35,44 @@ export default function Navbar({ isDark, toggleTheme }: NavbarProps) {
 
     const observer = new IntersectionObserver(
       (entries) => {
+        let bestRatio = 0;
+        let bestId = "";
+
         entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            setActive(`#${entry.target.id}`);
+          if (entry.isIntersecting && entry.intersectionRatio > bestRatio) {
+            bestRatio = entry.intersectionRatio;
+            bestId = `#${entry.target.id}`;
           }
         });
+
+        if (bestId) setActive(bestId);
       },
-      { threshold: 0.55 }
+      {
+        threshold: [0.2, 0.4, 0.6],
+        rootMargin: "-80px 0px -40% 0px",
+      }
     );
 
     sections.forEach((sec) => observer.observe(sec));
+
     return () => observer.disconnect();
   }, []);
 
+  // 🚀 SMOOTH SCROLL FIX (NO OFFSET BUG)
   const go = (href: string) => {
     setActive(href);
     setOpen(false);
 
-    document.querySelector(href)?.scrollIntoView({
-      behavior: "smooth",
-      block: "start",
-    });
+    const el = document.querySelector(href);
+    if (el) {
+      const top =
+        el.getBoundingClientRect().top + window.scrollY - 80;
+
+      window.scrollTo({
+        top,
+        behavior: "smooth",
+      });
+    }
   };
 
   return (
@@ -64,7 +83,7 @@ export default function Navbar({ isDark, toggleTheme }: NavbarProps) {
     >
       <div className="mt-4 w-[94%] md:w-[85%] relative">
 
-        {/* 🌊 SOFT CYAN AURORA (MATCH HERO) */}
+        {/* 🌊 CYAN AURA */}
         <div className="absolute inset-0 -z-10 overflow-hidden">
           <div className="absolute -top-20 left-1/2 -translate-x-1/2 w-[350px] h-[350px] bg-cyan-300/20 blur-[120px] rounded-full" />
           <div className="absolute top-0 right-0 w-[250px] h-[250px] bg-blue-400/20 blur-[120px] rounded-full" />
@@ -79,10 +98,9 @@ export default function Navbar({ isDark, toggleTheme }: NavbarProps) {
             relative flex items-center justify-between
             px-5 md:px-10 h-16
             backdrop-blur-xl transition-all duration-500
-
             ${
               scrolled
-                ? "bg-background/70 border border-border shadow-[0_10px_40px_-15px_rgba(56,189,248,0.15)]"
+                ? "bg-background/70 border border-border shadow-[0_10px_40px_-15px_rgba(56,189,248,0.2)]"
                 : "bg-transparent"
             }
           `}
@@ -93,8 +111,7 @@ export default function Navbar({ isDark, toggleTheme }: NavbarProps) {
             onClick={() => go("#home")}
             className="flex items-center gap-3 cursor-pointer group"
           >
-            <div className="w-1 h-6 bg-cyan-400/70 shadow-[0_0_10px_rgba(56,189,248,0.4)]" />
-
+            <div className="w-1 h-6 bg-cyan-400 shadow-[0_0_10px_rgba(56,189,248,0.5)]" />
             <div className="leading-tight">
               <p className="text-xs tracking-[0.3em] text-muted-foreground">
                 PORTFOLIO
@@ -119,13 +136,18 @@ export default function Navbar({ isDark, toggleTheme }: NavbarProps) {
               >
                 {i.label}
 
-                {/* smooth underline (Apple style) */}
+                {/* 🔥 FIXED UNDERLINE */}
                 {active === i.href && (
                   <motion.div
-                    layoutId="nav-underline"
+                    layoutId="underline"
+                    transition={{
+                      type: "spring",
+                      stiffness: 500,
+                      damping: 35,
+                    }}
                     className="
                       absolute -bottom-2 left-0 w-full h-[2px]
-                      bg-cyan-400/80
+                      bg-cyan-400
                       shadow-[0_0_12px_rgba(56,189,248,0.5)]
                       rounded-full
                     "
@@ -139,19 +161,14 @@ export default function Navbar({ isDark, toggleTheme }: NavbarProps) {
           <div className="flex items-center gap-3">
             <button
               onClick={toggleTheme}
-              className="
-                p-2 rounded-md border border-border
-                hover:border-cyan-300
-                hover:shadow-[0_0_12px_rgba(56,189,248,0.2)]
-                transition
-              "
+              className="p-2 border border-border hover:border-cyan-400 transition"
             >
               {isDark ? <Sun size={16} /> : <Moon size={16} />}
             </button>
 
             <button
               onClick={() => setOpen(!open)}
-              className="md:hidden p-2 border border-border rounded-md"
+              className="md:hidden p-2 border border-border"
             >
               {open ? <X size={16} /> : <Menu size={16} />}
             </button>
